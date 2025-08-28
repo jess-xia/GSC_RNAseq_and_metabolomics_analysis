@@ -3,6 +3,11 @@ title: "GSVA_analysis"
 output: html_document
 date: "2025-08-28"
 ---
+# Gene Set Variation Analysis (GSVA) of bulk RNA-seq data across various tissue and cell line samples
+This analysis uses the GSVA package in R to compute enrichment scores for specific gene signatures in bulk
+RNA-seq data from GBM patients. The signatures include developmental and injury response signatures from
+Richards et al. 2021 and an AhR activation signature from Sadik et al. 2020.
+
 ```{r}
 # R version used: 4.5.1
 # Load the libraries
