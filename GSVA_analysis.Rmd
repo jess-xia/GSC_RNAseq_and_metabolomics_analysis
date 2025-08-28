@@ -1,0 +1,98 @@
+---
+title: "GSVA_analysis"
+output: html_document
+date: "2025-08-28"
+---
+```{r}
+# R version used: 4.5.1
+# Load the libraries
+library(pheatmap)
+library(GSVA)
+library(readxl) 
+```
+
+## Load gene expression file
+Bulk RNA-seq data was provided by the Dirks lab
+```{r}
+# Read the first sheet of an Excel file
+expression_matrix <- read_excel("C:/research/raw_data/RNAseq_cohorts1-5 plus extra.xlsx")
+expression_matrix_df <- as.data.frame(expression_matrix)
+
+# Keep only rows and columns containing tissue expression data
+# Set second row as column names
+colnames(expression_matrix_df) <- as.character(unlist(expression_matrix_df[2, ]))
+# Remove the first two rows and first column 
+expression_matrix_df <- expression_matrix_df[-c(1, 2), ]
+
+# Set first column as row names
+rownames(expression_matrix_df) <- expression_matrix_df[[1]]
+# Remove the first two rows and first column 
+expression_matrix_df <- expression_matrix_df[, -1]
+
+# Convert all columns to numeric in the dataframe
+expression_matrix_df[] <- lapply(expression_matrix_df, as.numeric)
+# Check the structure to confirm
+# str(expression_matrix_df)
+# expression_matrix_new <- as.matrix(expression_matrix_df)
+
+# View the first few rows of the data
+print(head(expression_matrix_df[, 1:5], n = 5))
+
+```
+
+## Fetch the developmental and IR signatures
+Signature obtained from differential expression data
+Supplementary table 7 downloaded from Richards et al. 2021 paper (Gradient of Developmental and Injury Response transcriptional states defines functional vulnerabilities underpinning glioblastoma heterogeneity)
+```{r}
+signatures <- read_excel("C:/research/raw_data/43018_2020_154_MOESM9_ESM (8).xlsx")
+signatures_df <- as.data.frame(signatures)
+
+head(signatures_df, n = 10)
+
+# Filter genes in the Developmental group
+developmental_genes <- signatures_df$Gene[signatures_df$Group == "Developmental"]
+length(developmental_genes)
+# Filter genes in the Injury Response group
+injury_response_genes <- signatures_df$Gene[signatures_df$Group == "Injury_Response"]
+length(injury_response_genes)
+```
+
+## Fetch AhR activation signature
+Signature obtained from publication where the compiled the signature by combining expression datasets with natural language processing
+Supplemental table 2 downloaded from Sadik et al. 2020 paper (IL4I1 Is a Metabolic Immune Checkpoint that Activates the AHR and Promotes Tumor Progression)
+```{r}
+# Import another Excel file
+AhR_sigs_df <- read_excel("C:/research/raw_data/1-s2.0-S0092867420309466-mmc2.xlsx")
+colnames(AhR_sigs_df) <- as.character(unlist(AhR_sigs_df[2, ]))
+AhR_sigs_df <- AhR_sigs_df[-c(1, 2), ]
+AhR_sigs <- AhR_sigs_df$Gene
+
+# write.table(AhR_sigs, "AhR_sigs.csv", row.names = FALSE, col.names = FALSE, quote = FALSE, sep = ",")
+```
+## Perform GSVA on all signatures
+```{r}
+# Combine all three signatures for GSVA
+combined_signatures <- list(
+  DEV_gs = developmental_genes,
+  IR_gs = injury_response_genes,
+  AhR_activation_gs = AhR_sigs
+)
+
+expr_matrix <- as.matrix(expression_matrix_df)
+# mode(expr_matrix)
+
+param <- gsvaParam(expr_matrix, combined_signatures)
+gsva_results <- gsva(param)
+```
+
+## Save files for future use
+```{r}
+write.csv(gsva_results, "C:/research/gsva_results.csv", row.names = TRUE) 
+write.csv(expr_matrix, "C:/research/bulk_rnaseq_clean.csv", row.names = TRUE) 
+# For reading the csv file later
+# myMatrix <- as.matrix(read.csv("myMatrix.csv", row.names = 1))
+```
+
+
+
+
