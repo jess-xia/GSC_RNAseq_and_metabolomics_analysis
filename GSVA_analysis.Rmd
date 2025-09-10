@@ -74,13 +74,27 @@ AhR_sigs <- AhR_sigs_df$Gene
 
 # write.table(AhR_sigs, "AhR_sigs.csv", row.names = FALSE, col.names = FALSE, quote = FALSE, sep = ",")
 ```
+
+## Fetch Wnt pathway signature from MSigDB
+Signature obtained from MSigDB database : https://www.gsea-msigdb.org/gsea/msigdb/human/geneset/HALLMARK_WNT_BETA_CATENIN_SIGNALING.html
+
+
+```{r}
+# Read Wnt pathway signature gene list from MSigDB .grp file
+wnt_genes <- readLines("C:/research/raw_data/HALLMARK_WNT_BETA_CATENIN_SIGNALING.v2025.1.Hs.grp")
+# Remove any empty lines or comments if present
+wnt_genes <- wnt_genes[wnt_genes != ""]
+wnt_sigs <- wnt_genes[3:length(wnt_genes)]
+```
+
 ## Perform GSVA on all signatures
 ```{r}
 # Combine all three signatures for GSVA
 combined_signatures <- list(
   DEV_gs = developmental_genes,
   IR_gs = injury_response_genes,
-  AhR_activation_gs = AhR_sigs
+  AhR_activation_gs = AhR_sigs,
+  Wnt_activation_gs = wnt_sigs
 )
 
 expr_matrix <- as.matrix(expression_matrix_df)
@@ -92,8 +106,8 @@ gsva_results <- gsva(param)
 
 ## Save files for future use
 ```{r}
-write.csv(gsva_results, "C:/research/gsva_results.csv", row.names = TRUE) 
-write.csv(expr_matrix, "C:/research/bulk_rnaseq_clean.csv", row.names = TRUE) 
+write.csv(gsva_results, "C:/research/GSC_RNAseq_and_metabolomics_analysis/gsva_results.csv", row.names = TRUE) 
+# write.csv(expr_matrix, "C:/research/bulk_rnaseq_clean.csv", row.names = TRUE) 
 # For reading the csv file later
 # myMatrix <- as.matrix(read.csv("myMatrix.csv", row.names = 1))
 ```
