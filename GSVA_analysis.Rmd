@@ -107,7 +107,7 @@ gsva_results <- gsva(param)
 ## Save files for future use
 ```{r}
 write.csv(gsva_results, "C:/research/GSC_RNAseq_and_metabolomics_analysis/gsva_results.csv", row.names = TRUE) 
-# write.csv(expr_matrix, "C:/research/bulk_rnaseq_clean.csv", row.names = TRUE) 
+write.csv(expr_matrix, "C:/research/GSC_RNAseq_and_metabolomics_analysis/bulk_rnaseq_clean.csv", row.names = TRUE) 
 # For reading the csv file later
 # myMatrix <- as.matrix(read.csv("myMatrix.csv", row.names = 1))
 ```
