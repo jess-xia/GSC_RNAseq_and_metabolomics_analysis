@@ -77,8 +77,6 @@ AhR_sigs <- AhR_sigs_df$Gene
 
 ## Fetch Wnt pathway signature from MSigDB
 Signature obtained from MSigDB database : https://www.gsea-msigdb.org/gsea/msigdb/human/geneset/HALLMARK_WNT_BETA_CATENIN_SIGNALING.html
-
-
 ```{r}
 # Read Wnt pathway signature gene list from MSigDB .grp file
 wnt_genes <- readLines("C:/research/raw_data/HALLMARK_WNT_BETA_CATENIN_SIGNALING.v2025.1.Hs.grp")
@@ -87,6 +85,16 @@ wnt_genes <- wnt_genes[wnt_genes != ""]
 wnt_sigs <- wnt_genes[3:length(wnt_genes)]
 ```
 
+## Fetch mTORC1 signaling signature from MSigDB
+Signature obtained from MSigDB database : https://www.gsea-msigdb.org/gsea/msigdb/cards/HALLMARK_MTORC1_SIGNALING
+```{r}
+mtorc1_genes <- readLines("C:/research/raw_data/HALLMARK_MTORC1_SIGNALING.v2025.1.Hs.grp")
+mtorc1_genes <- mtorc1_genes[mtorc1_genes != ""]
+mtorc1_sigs <- mtorc1_genes[3:length(mtorc1_genes)]
+
+```
+
+
 ## Perform GSVA on all signatures
 ```{r}
 # Combine all three signatures for GSVA
@@ -94,7 +102,8 @@ combined_signatures <- list(
   DEV_gs = developmental_genes,
   IR_gs = injury_response_genes,
   AhR_activation_gs = AhR_sigs,
-  Wnt_activation_gs = wnt_sigs
+  Wnt_activation_gs = wnt_sigs,
+  mTORC1_activation_gs = mtorc1_sigs
 )
 
 expr_matrix <- as.matrix(expression_matrix_df)
@@ -104,14 +113,33 @@ param <- gsvaParam(expr_matrix, combined_signatures)
 gsva_results <- gsva(param)
 ```
 
+
 ## Save files for future use
 ```{r}
 write.csv(gsva_results, "C:/research/GSC_RNAseq_and_metabolomics_analysis/gsva_results.csv", row.names = TRUE) 
-write.csv(expr_matrix, "C:/research/GSC_RNAseq_and_metabolomics_analysis/bulk_rnaseq_clean.csv", row.names = TRUE) 
+# write.csv(expr_matrix, "C:/research/GSC_RNAseq_and_metabolomics_analysis/bulk_rnaseq_clean.csv", row.names = TRUE) 
 # For reading the csv file later
 # myMatrix <- as.matrix(read.csv("myMatrix.csv", row.names = 1))
 ```
 
 
+## Assess gene signature overlaps with Venn diagram
+```{r}
+# Load library
+library(VennDiagram)
+
+# Create Venn diagram
+venn.diagram(
+  x = list(Set1 = AhR_sigs, Set2 = wnt_sigs, Set3 = mtorc1_sigs),
+  category.names = c("AhR_sigs", "Wnt_sigs", "mTORC1_sigs"),
+  filename = "venn_diagram.png",  # Remove '#' from filename
+  output = TRUE,
+  scaled = TRUE,  # Scale circles to overlap size
+  fill = c("red", "blue", "green"),  # Optional: color for clarity
+  alpha = 0.5,  # Optional: transparency for overlaps
+  cex = 1.5,  # Font size for numbers
+  cat.cex = 1.5  # Font size for category names
+)
+```
 
 
